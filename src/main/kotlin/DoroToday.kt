@@ -1,4 +1,4 @@
-package org.example.mirai.plugin
+package org.wolftsume.overflow.plugin
 
 import net.mamoe.mirai.console.permission.AbstractPermitteeId
 import net.mamoe.mirai.console.permission.PermissionService
@@ -32,7 +32,7 @@ import net.mamoe.mirai.utils.info
  * 不用复制到 mirai-console-loader 或其他启动器中调试
  */
 
-object PluginMain : KotlinPlugin(
+object DoroToday : KotlinPlugin(
     JvmPluginDescription(
         id = "org.example.mirai-example",
         name = "插件示例",
