@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     val kotlinVersion = "1.8.10"
     kotlin("jvm") version kotlinVersion
@@ -6,7 +9,7 @@ plugins {
     id("net.mamoe.mirai-console") version "2.16.0"
 }
 
-group = "org.example"
+group = "org.wolftsume"
 version = "0.1.0"
 
 repositories {
@@ -29,4 +32,20 @@ dependencies {
     // compileOnly("top.mrxiaom:overflow-core-api:$VERSION")
 
     testConsoleRuntime("top.mrxiaom.mirai:overflow-core:1.0.5")
+    implementation(kotlin("stdlib-jdk8"))
+
+    val exposedVersion = "0.61.0"
+    implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+    implementation("com.alibaba:druid:1.2.23")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_1_8)
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_1_8)
 }

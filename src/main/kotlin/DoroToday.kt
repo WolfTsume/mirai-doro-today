@@ -1,5 +1,6 @@
 package org.wolftsume.overflow.plugin
 
+import com.alibaba.druid.pool.DruidDataSource
 import net.mamoe.mirai.console.permission.AbstractPermitteeId
 import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
@@ -12,10 +13,19 @@ import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent
 import net.mamoe.mirai.event.events.FriendMessageEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.events.NewFriendRequestEvent
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.utils.info
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.Connection
+import javax.sql.DataSource
+import org.wolftsume.overflow.plugin.DoroData.Doro
+import org.wolftsume.overflow.plugin.DoroConfig
 
 /**
  * 使用 kotlin 版请把
@@ -34,23 +44,30 @@ import net.mamoe.mirai.utils.info
 
 object DoroToday : KotlinPlugin(
     JvmPluginDescription(
-        id = "org.example.mirai-example",
-        name = "插件示例",
+        id = "org.wolftsume.overflow.plugin.DoroToday",
+        name = "DoroToday",
         version = "0.1.0"
     ) {
-        author("作者名称或联系方式")
+        author("五爪Tsume")
         info(
             """
-            这是一个测试插件, 
-            在这里描述插件的功能和用法等.
+            一个基于overflow的每日doro结局抽取插件
         """.trimIndent()
         )
         // author 和 info 可以删除.
     }
 ) {
+    private val userDB: Database.User
+    private val dataSource = DruidDataSource()
+    private val db: org.jetbrains.exposed.sql.Database
+
     override fun onEnable() {
-        logger.info { "Plugin loaded" }
-        //配置文件目录 "${dataFolder.absolutePath}/"
+        DoroData.reload()
+        DoroConfig.reload()
+        logger.info { "DoroToday loaded" }
+
+        GlobalEventChannel.subscribeGroupMessages {  }
+
         val eventChannel = GlobalEventChannel.parentScope(this)
         eventChannel.subscribeAlways<GroupMessageEvent> {
             //群消息
@@ -113,6 +130,18 @@ object DoroToday : KotlinPlugin(
             is Member -> AbstractPermitteeId.ExactMember(sender.group.id, sender.id)
             else -> AbstractPermitteeId.ExactUser(sender.id)
         }.hasPermission(myCustomPermission)
+    }
+
+    init{
+        dataSource.url = "jdbc:sqlite:${DoroToday.dataFolder}/${DoroConfig.database}"
+        dataSource.driverClassName = "org.sqlite.JDBC"
+        db = org.jetbrains.exposed.sql.Database.connect(dataSource as DataSource)
+        TransactionManager.manager.defaultIsolationLevel =
+            Connection.TRANSACTION_SERIALIZABLE
+        userDB = org.wolftsume.overflow.plugin.Database.User
+        transaction(db) {
+            SchemaUtils.create(userDB)
+        }
     }
     // endregion
 }

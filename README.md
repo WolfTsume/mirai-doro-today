@@ -1,5 +1,4 @@
-# mirai-console-plugin-template
+# overflow-doro-today
 
-[Mirai Console](https://github.com/mamoe/mirai-console) 插件模板, 使用 Kotlin + Gradle.
+一个基于overflow的每日doro结局抽取插件，用于本人练习github流
 
-[如何使用](https://github.com/project-mirai/how-to-use-plugin-template)
